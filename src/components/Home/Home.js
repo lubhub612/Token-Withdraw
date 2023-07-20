@@ -20,6 +20,9 @@ export default function Home() {
   const [tokenValue, setTokenValue] = useState('USDT');
   const [handleWithdrawLoader, setHandleWithdrawLoader] = useState(false);
   const [userWithdrawBalance, setUserWithdrawBalance] = useState(0);
+  const [userWithdrawTokenBalance, setUserWithdrawTokenBalance] = useState(0);
+  const [userWithdrawLimitBalance, setUserWithdrawLimitBalance] = useState(0);
+  const [userWithdrawTokenLimitBalance, setUserWithdrawTokenLimitBalance] = useState(0);
   const [userValid, setUserValid] = useState(false);
   const [tokenPrice, setTokePrice] = useState(0);
   const [show, setShow] = useState(false);
@@ -70,6 +73,9 @@ export default function Home() {
   useEffect(() => {
     if (userAddress) {
       getUserWalletBalance();
+      getUserWalletTokenBalance();
+      getUserUsdtLimitBalance();
+      getUserTokenLimitBalance();
     }
     return () => {};
   }, [userAddress]);
@@ -247,9 +253,10 @@ export default function Home() {
     }
      */
 
-    if (withdrawValue > userWithdrawBalance) {
+ /*   if (withdrawValue > userWithdrawBalance) {
+      setShow(false)
       return toast.error('Amount should not be greater than Balance.');
-    }
+    }  */
 
     setHandleWithdrawLoader(true);
     try {
@@ -261,26 +268,69 @@ export default function Home() {
       );
      
       if(tokenValue === 'DOT') {
-      const withdraw = await MLMnew._withdrawCoin(Number(1), ethers.utils.parseEther(withdrawValue) );
+        if (withdrawValue > userWithdrawTokenLimitBalance) {
+          setHandleWithdrawLoader(false);
+      setShowDanger(false);
+          return toast.error('Amount should not be greater than Withdraw Limit  Balance.');
+        }
+        let formData = new FormData();
+        formData.append('address', userAddress);
+        formData.append('amount', withdrawValue);
+         let withdrawApi = await axios.post(`https://federalcoin.social/dashboard/api/coin_redeem.php`, formData).then(async (res, err) => {
+            if (res) {
+             console.log(res)
+             const withdraw = await MLMnew._withdrawCoin(Number(1), ethers.utils.parseEther(withdrawValue) );
 
       const waitforTx = await withdraw.wait();
       if (waitforTx) {
+        getUserWalletTokenBalance();
         setHandleWithdrawLoader(false);
         toast.success('Withdraw successful.');
         
-        setShowDanger(false);
+       
       }
-    } else {
-      
-        const withdraw = await MLMnew._withdrawCoin(Number(0),  ethers.utils.parseEther(withdrawValue) );
+              return res;
   
+            }
+            if (err) {
+              console.log(err);
+            };
+          });
+          setShowDanger(false);
+          console.log("🚀 ~ const_handleDeposit= ~ depositApi", withdrawApi);
+    } else {
+      if (withdrawValue > userWithdrawLimitBalance) {
+        setHandleWithdrawLoader(false);
+      setShowDanger(false);
+        return toast.error('Amount should not be greater than Withdraw Lmit Balance.');
+        
+      }
+      let formData = new FormData();
+        formData.append('address', userAddress);
+        formData.append('amount', withdrawValue);
+
+       
+  let withdrawApi = await axios.post(`https://federalcoin.social/dashboard/api/redeem.php`, formData).then(async (res, err) => {
+            if (res) {
+             console.log(res)
+             const withdraw = await MLMnew._withdrawCoin(Number(0),  ethers.utils.parseEther(withdrawValue) );
         const waitforTx = await withdraw.wait();
         if (waitforTx) {
+          getUserWalletBalance();
           setHandleWithdrawLoader(false);
           toast.success('Withdraw successful.');
           
-          setShowDanger(false);
+          
         }
+        return res;
+  
+            }
+            if (err) {
+              console.log(err);
+            };
+          });
+          console.log("🚀 ~ const_handleDeposit= ~ depositApi", withdrawApi);
+          setShowDanger(false);
     } 
     } catch (error) {
       console.log(error);
@@ -298,23 +348,119 @@ export default function Home() {
 
 
   const getUserWalletBalance = async () => {
-    let url = `https://metabitclub.com/dashboard/b59c67bf196a4758191e42f76670cebaAPI/usd_balance.php?address=${userAddress}`;
 
-    let bal = await axios.get(url).then((res, err) => {
-      if (err) {
-        setUserValid(false);
-        console.log('err', err);
+    
+
+    try {
+      
+      let url = `https://federalcoin.social/dashboard/api/usd_balance.php?address=${userAddress}`;
+      let bal = await axios.get(url).then((res, err) => {
+        if (err) {
+          setUserValid(false);
+          console.log("err", err);
+        }
+        if (res) {
+          console.log("🚀 ~ bal ~ res", res);
+          setUserValid(true);
+          return res;
+        }
+      });
+      console.log("🚀 ~ bal ~ bal", bal);
+      if (bal.data == "Not Valid") {
+        setUserWithdrawBalance(0);
+      } else {
+        setUserWithdrawBalance(bal.data);
       }
-      if (res) {
-        console.log('🚀 ~ bal ~ res', res);
-        setUserValid(true);
-        return res;
-      }
-    });
-    setUserWithdrawBalance(bal.data);
+    } catch (error) {
+      console.log("🚀 ~ getUserWalletBalance ~ error", error);
+    }
   };
-  
 
+   const getUserWalletTokenBalance = async () => {
+
+    
+    try {
+      
+      let url = `https://federalcoin.social/dashboard/api/coin_balance.php?address=${userAddress}`;
+      let bal = await axios.get(url).then((res, err) => {
+        if (err) {
+          setUserValid(false);
+          console.log("err", err);
+        }
+        if (res) {
+          console.log("🚀 ~ bal ~ res", res);
+          setUserValid(true);
+          return res;
+        }
+      });
+      console.log("🚀 ~ bal ~ bal", bal);
+      if (bal.data == "Not Valid") {
+        setUserWithdrawTokenBalance(0);
+      } else {
+        setUserWithdrawTokenBalance(bal.data);
+      }
+    } catch (error) {
+      console.log("🚀 ~ getUserWalletBalance ~ error", error);
+    }
+  };
+
+
+  const getUserUsdtLimitBalance = async () => {
+
+    
+    try {
+      
+      let url = `https://federalcoin.social/dashboard/api/balance.php?address=${userAddress}`;
+      let bal = await axios.get(url).then((res, err) => {
+        if (err) {
+          setUserValid(false);
+          console.log("err", err);
+        }
+        if (res) {
+          console.log("🚀 ~ bal ~ res", res);
+          setUserValid(true);
+          return res;
+        }
+      });
+      console.log("🚀 ~ bal ~ bal", bal);
+      if (bal.data == "Not Valid") {
+        setUserWithdrawLimitBalance(0);
+      } else {
+        setUserWithdrawLimitBalance(bal.data);
+      }
+    } catch (error) {
+      console.log("🚀 ~ getUserWalletBalance ~ error", error);
+    }
+  };
+
+   const getUserTokenLimitBalance = async () => {
+
+    
+    
+    try {
+      
+      let url = `https://federalcoin.social/dashboard/api/coin_balance1.php?address=${userAddress}`;
+      let bal = await axios.get(url).then((res, err) => {
+        if (err) {
+          setUserValid(false);
+          console.log("err", err);
+        }
+        if (res) {
+          console.log("🚀 ~ bal ~ res", res);
+          setUserValid(true);
+          return res;
+        }
+      });
+      console.log("🚀 ~ bal ~ bal", bal);
+      if (bal.data == "Not Valid") {
+        setUserWithdrawTokenLimitBalance(0);
+      } else {
+        setUserWithdrawTokenLimitBalance(bal.data);
+      }
+    } catch (error) {
+      console.log("🚀 ~ getUserWalletBalance ~ error", error);
+    }
+  };
 
   return (
     <>
@@ -389,8 +535,8 @@ export default function Home() {
                       fontSize: '20px'
                     }}
                   >
-                    (My Balance) - ({userWithdrawBalance}
-                    {'USDT'})
+                    (My Balance) - ( {tokenValue === 'USDT' ? userWithdrawBalance : userWithdrawTokenBalance }
+                              {tokenValue })
                   </p>
                 </div>
               </div>
@@ -425,6 +571,18 @@ export default function Home() {
                       </div>
                     
               </div>  
+              <div className="row  mx-2">
+                        <div className="col d-flex  ">
+                        <p
+                            className=" pt-2"
+                            style={{ fontSize: "16px" , 
+                              color: ' rgb(20 21 51)'
+                            }}
+                          >
+                            Withdraw Limit : {tokenValue === 'USDT' ? userWithdrawLimitBalance : userWithdrawTokenLimitBalance } {tokenValue}
+                          </p>
+                          </div>
+                      </div>
             </div>
 
             {userValid ? (
