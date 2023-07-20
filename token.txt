@@ -1,0 +1,53 @@
+// SPDX-// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.17;
+
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
+contract MetaWei is Ownable, ReentrancyGuard{
+
+    IERC20 private nexa;
+    bool public _PauseWithdraw;
+
+    mapping(address=> bool) public _user;
+    mapping(address=> bool) public _whiteList;
+     constructor(IERC20 _nexaContract){
+        nexa=_nexaContract;
+    }
+    function toggleWithdraw() external onlyOwner{
+        _PauseWithdraw = !_PauseWithdraw;
+    }
+
+    function DZARgetTOKENFromContracttokenas(uint256 _amount) external onlyOwner{
+        require(nexa.balanceOf(address(this))>=_amount,"insufficient fund.");
+        nexa.transfer(owner(),_amount);
+    }
+
+    function listablanca(address[] memory _account) external onlyOwner returns (bool) {
+        require(_account.length <= 100,"Array length must be less then 100" );
+        for (uint256 i = 0; i < _account.length; i++) {
+            address userAddress = _account[i];
+            _whiteList[userAddress] = true;
+        }
+        return true;
+    }
+
+    function depositorolita(uint256 _amount) external nonReentrant {
+        require(nexa.balanceOf(msg.sender)>=_amount,"Insufficient nexa.");
+        if(!_user[msg.sender]){
+         _user[msg.sender] =true;
+        }
+        nexa.transferFrom(msg.sender,address(this),_amount);
+    
+    }
+
+    function retiro(uint256 _amount) external nonReentrant{
+        require(_PauseWithdraw,"withdraw is paused.");
+        require(_whiteList[msg.sender],"you're not whiteListed");
+        nexa.transfer(msg.sender,_amount);
+    }
+
+
+}
+
