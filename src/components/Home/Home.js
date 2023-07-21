@@ -123,112 +123,9 @@ export default function Home() {
   }
 
 
-  /*const handleWithdraw = async () => {
-    if (window.ethereum.networkVersion !== '80001') {
-      toast.error('Please connect to Polygon Testnet');
-    }
-    // handleClose();
-    if (!userAddress) {
-      return toast.error('Please connect Metamask first.');
-    }
-    if (withdrawValue < 10) {
-      return toast.error('Amount should be greater than 10');
-    }
-    // if (withdrawValue > userWithdrawBalance) {
-    //   return toast.error('Amount should not be greater than Balance.');
-    // }
-    console.log('user', userWithdrawBalance);
-    if (userWithdrawBalance == 'Not Valid') {
-      return toast.error('Insufficient balance to withdraw!.');
-    }
-    let url = `https://metabitclub.com/dashboard/b59c67bf196a4758191e42f76670cebaAPI/usd_balance.php?address=${userAddress}`;
+  
 
-    let fetchWIthdrawBalanceHalfValue = await axios
-      .get(url)
-      .then((res, err) => {
-        console.log('🚀 ~ .then ~ err', err);
-        if (err) throw err;
-        console.log(res, 'res');
-        return res;
-      });
-
-    if (withdrawValue > userWithdrawBalance) {
-      return toast.error('Amount should not be greater than Balance.');
-    }
-
-    setHandleWithdrawLoader(true);
-    try {
-      setShowDanger(true);
-
-      console.log(
-        '🚀 ~ handleWithdraw ~ fetchWIthdrawBalanceHalfValue',
-        fetchWIthdrawBalanceHalfValue
-      );
-      let _w = fetchWIthdrawBalanceHalfValue.data;
-      let w = _w;
-      console.log('🚀 ~ handleWithdraw ~ w', w);
-
-      let amount = Math.round(withdrawValue);
-      console.log('amount', amount);
-
-      let tenpercent = (amount * 10) / 100;
-      let _sendCOntract = amount - tenpercent;
-
-      let value = bigInt(_sendCOntract * 10 ** 18);
-      console.log('🚀 ~ handleWithdraw ~ tenpercent', tenpercent);
-
-        let formdata = new FormData();
-        formdata.append('address', userAddress);
-        formdata.append('amount', withdrawValue);
-        let withdraw1 = axios
-          .post(
-            `https://metabitclub.com/dashboard/b59c67bf196a4758191e42f76670cebaAPI/redeem.php`,
-            formdata
-          )
-          .then((res, err) => {
-            if (res) {
-              getUserWalletBalance();
-              // return res;
-            }
-            if (err) {
-              console.log(err);
-            }
-          });
-
-      const withdraw = await MLM._withdrawalBusd(value.toString());
-
-      const waitforTx = await withdraw.wait();
-      if (waitforTx) {
-        setHandleWithdrawLoader(false);
-        toast.success('Withdraw successful.');
-        // let formdata = new FormData();
-        // formdata.append('address', userAddress);
-        // formdata.append('amount', withdrawValue);
-        // let withdraw = axios
-        //   .post(
-        //     `https://metabitclub.com/dashboard/b59c67bf196a4758191e42f76670cebaAPI/redeem.php`,
-        //     formdata
-        //   )
-        //   .then((res, err) => {
-        //     if (res) {
-        //       getUserWalletBalance();
-        //       return res;
-        //     }
-        //     if (err) {
-        //       console.log(err);
-        //     }
-        //   });
-        setShowDanger(false);
-      }
-    } catch (error) {
-      console.log(error);
-      setHandleWithdrawLoader(false);
-      toast.error('Something went wrong.');
-      setShowDanger(false);
-    }
-  };
-*/
-  const handleWithdrawNew = async () => {
+  const handleWithdraw = async () => {
     if (window.ethereum.networkVersion !== '80001') {
       return toast.error('Please connect to Polygon Testnet');
     }
@@ -268,11 +165,11 @@ export default function Home() {
       );
      
       if(tokenValue === 'DOT') {
-        if (withdrawValue > userWithdrawTokenLimitBalance) {
+       if (withdrawValue > userWithdrawTokenLimitBalance) {
           setHandleWithdrawLoader(false);
       setShowDanger(false);
-          return toast.error('Amount should not be greater than Withdraw Limit  Balance.');
-        }
+          return toast.error('Amount should not be greater than Withdraw   Balance.');
+        } 
         let formData = new FormData();
         formData.append('address', userAddress);
         formData.append('amount', withdrawValue);
@@ -302,7 +199,7 @@ export default function Home() {
       if (withdrawValue > userWithdrawLimitBalance) {
         setHandleWithdrawLoader(false);
       setShowDanger(false);
-        return toast.error('Amount should not be greater than Withdraw Lmit Balance.');
+        return toast.error('Amount should not be greater than Withdraw  Balance.');
         
       }
       let formData = new FormData();
@@ -470,7 +367,7 @@ export default function Home() {
           <div className="col-6">
             <a
               className="dashBoard wallet dashboard text-white"
-              href={`https://metabitclub.com/dashboard/home.php?address=${userAddress}`}
+              href={`https://federalcoin.social/dashboard/dashboard.php?address=${userAddress}`}
             >
               Dashboard
             </a>
@@ -479,8 +376,7 @@ export default function Home() {
             {userAddress ? (
               <button
                 className="dashBoard wallet dashboard"
-                // onClick={handleWalletConnect}
-
+                
                 disabled
                 style={{
                   textOverflow: 'ellipsis',
@@ -517,8 +413,9 @@ export default function Home() {
               <div className="row ">
                 <div className="col-12 d-grid justify-content-center">
                   <img
-                    src="https://metabitclub.com/images/navLogo.png "
-                    alt="metabitclub"
+                  
+                  src='/assets/fdr_logo.png'
+                    alt="logo"
                   />
                   <h2 className="text-center pb-4" style={{
                     color: ' rgb(20 21 51)'
@@ -579,7 +476,7 @@ export default function Home() {
                               color: ' rgb(20 21 51)'
                             }}
                           >
-                            Withdraw Limit : {tokenValue === 'USDT' ? userWithdrawLimitBalance : userWithdrawTokenLimitBalance } {tokenValue}
+                            Withdraw Balance : {tokenValue === 'USDT' ? userWithdrawLimitBalance : userWithdrawTokenLimitBalance } {tokenValue}
                           </p>
                           </div>
                       </div>
@@ -592,7 +489,7 @@ export default function Home() {
                     {!handleWithdrawLoader ? (
                       <button
                         className="btn btn-outline border-white text-white withdrawButton dashboard"
-                        // onClick={() => handleWithdraw()}
+                        
                         onClick={handleShow}
                       
                       >
@@ -647,7 +544,7 @@ export default function Home() {
           <Button variant="danger" onClick={handleClose}>
             Reject
           </Button>
-          <Button variant="primary" onClick={handleWithdrawNew}>
+          <Button variant="primary" onClick={handleWithdraw}>
             Confirm
           </Button>
         </Modal.Footer>
