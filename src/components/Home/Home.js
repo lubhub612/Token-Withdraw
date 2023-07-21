@@ -16,6 +16,8 @@ import { ethers } from 'ethers';
 
 export default function Home() {
   const [userAddress, setUserAddress] = useState('');
+  const [estimateValue, setEstimateValue] = useState('');
+  const [estimateWithdrawValue, setEstimateWithdrawValue] = useState('');
   const [withdrawValue, setWithdrawValue] = useState('');
   const [tokenValue, setTokenValue] = useState('USDT');
   const [handleWithdrawLoader, setHandleWithdrawLoader] = useState(false);
@@ -176,7 +178,7 @@ export default function Home() {
          let withdrawApi = await axios.post(`https://federalcoin.social/dashboard/api/coin_redeem.php`, formData).then(async (res, err) => {
             if (res) {
              console.log(res)
-             const withdraw = await MLMnew._withdrawCoin(Number(1), ethers.utils.parseEther(withdrawValue) );
+             const withdraw = await MLMnew._withdrawCoin(Number(1), ethers.utils.parseEther(estimateValue)  );
 
       const waitforTx = await withdraw.wait();
       if (waitforTx) {
@@ -210,7 +212,7 @@ export default function Home() {
   let withdrawApi = await axios.post(`https://federalcoin.social/dashboard/api/redeem.php`, formData).then(async (res, err) => {
             if (res) {
              console.log(res)
-             const withdraw = await MLMnew._withdrawCoin(Number(0),  ethers.utils.parseEther(withdrawValue) );
+             const withdraw = await MLMnew._withdrawCoin(Number(0),  ethers.utils.parseEther(estimateValue)  );
         const waitforTx = await withdraw.wait();
         if (waitforTx) {
           getUserWalletBalance();
@@ -240,6 +242,20 @@ export default function Home() {
       }
       setHandleWithdrawLoader(false);
       setShowDanger(false);
+    }
+  };
+
+
+
+  const  getEstimateAmount = async (val) => {
+    console.log("🚀 ~ getEstimateToken ~ val", val)
+    if (val > 0) {
+      
+      let amount = (val * (90))/ (100);
+      console.log("🚀 ~ getEstimateToken ~ amount", amount)
+      setEstimateValue(amount.toString());
+    } else {
+      setEstimateValue('0');
     }
   };
 
@@ -414,7 +430,7 @@ export default function Home() {
                 <div className="col-12 d-grid justify-content-center">
                   <img
                   
-                  src='/assets/fdr_logo.png'
+                  src='./assets/fdr_logo_new.png'
                     alt="logo"
                   />
                   <h2 className="text-center pb-4" style={{
@@ -460,7 +476,10 @@ export default function Home() {
                             placeholder="Enter Token Value"
                             aria-label="default input example"
                             value={withdrawValue}
-                            onChange={(e) => setWithdrawValue(e.target.value)}
+                            onChange={(e) => {
+                              setWithdrawValue(e.target.value)
+                              getEstimateAmount(e.target.value);
+                            }}
                               
                           />
                           
@@ -477,6 +496,18 @@ export default function Home() {
                             }}
                           >
                             Withdraw Balance : {tokenValue === 'USDT' ? userWithdrawLimitBalance : userWithdrawTokenLimitBalance } {tokenValue}
+                          </p>
+                          </div>
+                      </div>
+                      <div className="row  mx-2">
+                        <div className="col d-flex  ">
+                        <p
+                            className=" pt-2"
+                            style={{ fontSize: "16px" , 
+                              color: ' rgb(20 21 51)'
+                            }}
+                          >
+                            CREDIT : {estimateValue ?? '0'} {tokenValue}
                           </p>
                           </div>
                       </div>
